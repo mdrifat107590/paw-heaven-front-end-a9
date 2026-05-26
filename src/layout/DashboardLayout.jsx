@@ -22,6 +22,14 @@ const DashboardLayout = () => {
         <HiHome size={22} />
         Home
       </NavLink>
+      <NavLink
+        to="/"
+        onClick={closeSidebar}
+        className="flex items-center gap-3 hover:bg-orange-600 px-4 py-3 rounded-xl transition"
+      >
+        <HiHome size={22} />
+        Dashboard
+      </NavLink>
 
       <NavLink
         to="/dashboard/add-pet"
