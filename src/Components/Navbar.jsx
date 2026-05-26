@@ -59,7 +59,7 @@ const Navbar = () => {
               alt="logo"
               className="w-10 h-10"
             />
-            <h2 className="text-2xl font-bold text-orange-500">PetAdopt</h2>
+            <h2 className="text-2xl font-bold text-orange-500">PetHeaven</h2>
           </Link>
 
           <ul className="hidden lg:flex items-center gap-8 font-medium text-gray-700">
