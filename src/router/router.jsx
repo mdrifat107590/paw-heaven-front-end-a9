@@ -26,7 +26,7 @@ const router = createBrowserRouter([
         element: <AllPets />,
       },
       {
-        path: "/pet/:id",
+        path: "/all-pets/:id",
         element: (
           <PrivateRoute>
             <PetDetails />

@@ -1,197 +1,245 @@
+import { useContext, useEffect, useState } from "react";
+
 import { useParams } from "react-router-dom";
-import pets from "../data/pets";
+
+import Swal from "sweetalert2";
+
+import { AuthContext } from "../context/AuthContext";
 
 const PetDetails = () => {
   const { id } = useParams();
 
-  const pet = pets.find(
-    (singlePet) => singlePet.id === parseInt(id)
-  );
+  const { user } = useContext(AuthContext);
 
-  if (!pet) {
-    return (
-      <div className="min-h-screen flex justify-center items-center">
-        <h2 className="text-4xl font-bold">
-          Pet Not Found
-        </h2>
-      </div>
-    );
-  }
+  const [pet, setPet] = useState({});
+
+  useEffect(() => {
+    fetch(`http://localhost:5000/pets/${id}`)
+      .then((res) => res.json())
+
+      .then((data) => setPet(data));
+  }, [id]);
+
+  // Handle Adoption Request
+  const handleAdoption = async (e) => {
+    e.preventDefault();
+
+    const form = e.target;
+
+    const adoptionData = {
+      petId: pet._id,
+      petName: pet.petName,
+
+      requesterName: user?.displayName,
+
+      requesterEmail: user?.email,
+
+      pickupDate: form.pickupDate.value,
+
+      message: form.message.value,
+
+      status: "Pending",
+
+      requestDate: new Date(),
+    };
+
+    try {
+      const response = await fetch("http://localhost:5000/requests", {
+        method: "POST",
+
+        headers: {
+          "content-type": "application/json",
+        },
+
+        body: JSON.stringify(adoptionData),
+      });
+
+      const data = await response.json();
+
+      if (data.insertedId) {
+        Swal.fire({
+          icon: "success",
+          title: "Adoption Request Submitted",
+        });
+
+        form.reset();
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: error.message,
+      });
+    }
+  };
 
   return (
-    <div className="bg-gray-50 py-16 min-h-screen">
+    <div className="bg-gray-50 min-h-screen py-16">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="grid lg:grid-cols-2 gap-12">
-          <div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          <div className="lg:col-span-2 bg-white rounded-3xl shadow-lg overflow-hidden">
             <img
               src={pet.image}
-              alt={pet.name}
-              className="w-full h-[500px] object-cover rounded-3xl shadow-lg"
+              alt={pet.petName}
+              className="w-full h-[500px] object-cover"
             />
+
+            <div className="p-8">
+              <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-5 mb-8">
+                <div>
+                  <span className="bg-orange-100 text-orange-500 px-4 py-1 rounded-full text-sm font-semibold">
+                    {pet.species}
+                  </span>
+
+                  <h1 className="text-5xl font-bold text-gray-800 mt-4">
+                    {pet.petName}
+                  </h1>
+                </div>
+
+                <div>
+                  <h2 className="text-4xl font-bold text-orange-500">
+                    ৳ {pet.fee}
+                  </h2>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                <div className="bg-orange-50 p-5 rounded-2xl">
+                  <h3 className="text-gray-500 mb-2">Breed</h3>
+
+                  <p className="text-xl font-bold text-gray-800">{pet.breed}</p>
+                </div>
+
+                <div className="bg-orange-50 p-5 rounded-2xl">
+                  <h3 className="text-gray-500 mb-2">Age</h3>
+
+                  <p className="text-xl font-bold text-gray-800">{pet.age}</p>
+                </div>
+
+                <div className="bg-orange-50 p-5 rounded-2xl">
+                  <h3 className="text-gray-500 mb-2">Gender</h3>
+
+                  <p className="text-xl font-bold text-gray-800">
+                    {pet.gender}
+                  </p>
+                </div>
+
+                <div className="bg-orange-50 p-5 rounded-2xl">
+                  <h3 className="text-gray-500 mb-2">Location</h3>
+
+                  <p className="text-xl font-bold text-gray-800">
+                    {pet.location}
+                  </p>
+                </div>
+
+                <div className="bg-orange-50 p-5 rounded-2xl">
+                  <h3 className="text-gray-500 mb-2">Health Status</h3>
+
+                  <p className="text-xl font-bold text-gray-800">
+                    {pet.health}
+                  </p>
+                </div>
+
+                <div className="bg-orange-50 p-5 rounded-2xl">
+                  <h3 className="text-gray-500 mb-2">Vaccination</h3>
+
+                  <p className="text-xl font-bold text-gray-800">
+                    {pet.vaccination}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <h2 className="text-3xl font-bold text-gray-800 mb-5">
+                  About {pet.petName}
+                </h2>
+
+                <p className="text-gray-600 leading-8 text-lg">
+                  {pet.description}
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div className="bg-white rounded-3xl shadow-lg p-8">
-            <span className="bg-orange-100 text-orange-500 px-4 py-2 rounded-full text-sm font-semibold">
-              {pet.species}
-            </span>
-
-            <h1 className="text-5xl font-bold mt-6 mb-6">
-              {pet.name}
-            </h1>
-
-            <div className="space-y-4 text-lg text-gray-700">
-              <p>
-                <span className="font-bold">
-                  Breed:
-                </span>{" "}
-                {pet.breed}
-              </p>
-
-              <p>
-                <span className="font-bold">
-                  Age:
-                </span>{" "}
-                {pet.age}
-              </p>
-
-              <p>
-                <span className="font-bold">
-                  Location:
-                </span>{" "}
-                {pet.location}
-              </p>
-
-              <p>
-                <span className="font-bold">
-                  Adoption Fee:
-                </span>{" "}
-                ৳ {pet.fee}
-              </p>
-
-              <p>
-                <span className="font-bold">
-                  Gender:
-                </span>{" "}
-                Male
-              </p>
-
-              <p>
-                <span className="font-bold">
-                  Vaccination:
-                </span>{" "}
-                Vaccinated
-              </p>
-
-              <p>
-                <span className="font-bold">
-                  Health Status:
-                </span>{" "}
-                Healthy
-              </p>
-            </div>
-
-            <div className="mt-8">
-              <h3 className="text-2xl font-bold mb-3">
-                About {pet.name}
-              </h3>
-
-              <p className="text-gray-600 leading-8">
-                {pet.name} is a friendly and adorable pet
-                looking for a loving forever home.
-                This pet is playful, healthy, and perfect
-                for families who love animals.
-              </p>
-            </div>
-
-            <button
-              className="w-full mt-10 bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl text-lg font-semibold transition"
-            >
-              Adopt Now
-            </button>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-3xl shadow-lg mt-16 p-10">
-          <div className="mb-10 text-center">
-            <h2 className="text-4xl font-bold mb-4">
-              Adoption Request Form
+          <div className="bg-white rounded-3xl shadow-lg p-6 lg:p-8 h-fit sticky top-28">
+            <h2 className="text-3xl font-bold text-gray-800 mb-8">
+              Adoption Form
             </h2>
 
-            <p className="text-gray-600">
-              Fill out the form below to request adoption.
-            </p>
-          </div>
+            <form onSubmit={handleAdoption} className="space-y-5">
+              <div>
+                <label className="block mb-2 font-semibold text-gray-700">
+                  Pet Name
+                </label>
 
-          <form className="grid md:grid-cols-2 gap-6">
-            <div>
-              <label className="block mb-2 font-semibold">
-                Pet Name
-              </label>
+                <input
+                  type="text"
+                  value={pet.petName || ""}
+                  readOnly
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 bg-gray-100 cursor-not-allowed"
+                />
+              </div>
 
-              <input
-                type="text"
-                value={pet.name}
-                readOnly
-                className="w-full border border-gray-300 rounded-xl px-4 py-3 bg-gray-100"
-              />
-            </div>
+              <div>
+                <label className="block mb-2 font-semibold text-gray-700">
+                  User Name
+                </label>
 
-            <div>
-              <label className="block mb-2 font-semibold">
-                User Name
-              </label>
+                <input
+                  type="text"
+                  value={user?.displayName || ""}
+                  readOnly
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 bg-gray-100 cursor-not-allowed"
+                />
+              </div>
 
-              <input
-                type="text"
-                placeholder="Enter your name"
-                className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-orange-500"
-              />
-            </div>
+              <div>
+                <label className="block mb-2 font-semibold text-gray-700">
+                  User Email
+                </label>
 
-            <div>
-              <label className="block mb-2 font-semibold">
-                User Email
-              </label>
+                <input
+                  type="email"
+                  value={user?.email || ""}
+                  readOnly
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 bg-gray-100 cursor-not-allowed"
+                />
+              </div>
 
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-orange-500"
-              />
-            </div>
+              <div>
+                <label className="block mb-2 font-semibold text-gray-700">
+                  Pickup Date
+                </label>
 
-            <div>
-              <label className="block mb-2 font-semibold">
-                Pickup Date
-              </label>
+                <input
+                  type="date"
+                  name="pickupDate"
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-orange-500"
+                  required
+                />
+              </div>
 
-              <input
-                type="date"
-                className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-orange-500"
-              />
-            </div>
+              <div>
+                <label className="block mb-2 font-semibold text-gray-700">
+                  Message
+                </label>
 
-            <div className="md:col-span-2">
-              <label className="block mb-2 font-semibold">
-                Message
-              </label>
+                <textarea
+                  name="message"
+                  rows="5"
+                  placeholder="Why do you want to adopt this pet?"
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-orange-500 resize-none"
+                  required
+                ></textarea>
+              </div>
 
-              <textarea
-                rows="5"
-                placeholder="Why do you want to adopt this pet?"
-                className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-orange-500"
-              ></textarea>
-            </div>
-
-            <div className="md:col-span-2">
               <button
                 type="submit"
                 className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl text-lg font-semibold transition"
               >
-                Submit Adoption Request
+                Adopt Now
               </button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
     </div>
