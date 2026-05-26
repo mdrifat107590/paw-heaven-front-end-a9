@@ -5,7 +5,7 @@ import Swal from "sweetalert2";
 import { AuthContext } from "../context/AuthContext";
 
 const Register = () => {
-  const { createUser, updateUser } = useContext(AuthContext);
+  const { createUser, updateUser, googleLogin } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleRegister = (e) => {
@@ -84,7 +84,25 @@ const Register = () => {
         });
       });
   };
-
+  const handleGoogleLogin = () => {
+      googleLogin()
+        .then((result) => {
+          console.log(result.user);
+  
+          Swal.fire({
+            icon: "success",
+            title: "Google Login Successful",
+          });
+  
+          navigate("/");
+        })
+        .catch((error) => {
+          Swal.fire({
+            icon: "error",
+            title: error.message,
+          });
+        });
+    };
   return (
     <div className="min-h-screen bg-orange-50 flex justify-center items-center px-4 py-16">
       <div className="w-full max-w-lg bg-white rounded-3xl shadow-xl p-8">
@@ -174,6 +192,7 @@ const Register = () => {
 
           <button
             type="button"
+            onClick={handleGoogleLogin}
             className="w-full border border-gray-300 hover:bg-gray-100 py-3 rounded-xl font-semibold transition flex justify-center items-center gap-3"
           >
             <FcGoogle size={24} />
