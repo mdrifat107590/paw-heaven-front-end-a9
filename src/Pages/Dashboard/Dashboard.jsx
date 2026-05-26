@@ -1,16 +1,11 @@
 import { useContext, useEffect, useState } from "react";
-
 import { FaPaw, FaHeart, FaCheckCircle, FaClock } from "react-icons/fa";
-
 import { AuthContext } from "../../context/AuthContext";
-
+import Loader from "../../Components/Loader"
 const DashboardHome = () => {
   const { user } = useContext(AuthContext);
-
   const [myPets, setMyPets] = useState([]);
-
   const [myRequests, setMyRequests] = useState([]);
-
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,12 +31,10 @@ const DashboardHome = () => {
   }, [user]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex justify-center items-center">
-        <span className="loading loading-spinner loading-lg text-orange-500"></span>
-      </div>
-    );
-  }
+
+  return <Loader />;
+
+}
 
   return (
     <div className="min-h-screen">
