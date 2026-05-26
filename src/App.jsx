@@ -1,5 +1,11 @@
-export default function App() {
+import MainLayout from "./layout/MainLayout";
+
+const App = () => {
   return (
-    <div className="w-2xl text-red-600">Paw Heaven</div>
-  )
-}
+    <>
+      <MainLayout></MainLayout>
+    </>
+  );
+};
+
+export default App;
