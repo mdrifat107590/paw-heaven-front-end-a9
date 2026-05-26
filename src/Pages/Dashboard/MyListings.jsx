@@ -6,21 +6,31 @@ import { AuthContext } from "../../context/AuthContext";
 
 const MyListings = () => {
   const { user } = useContext(AuthContext);
+
   const [selectedPet, setSelectedPet] = useState(null);
+
   const [updatePet, setUpdatePet] = useState(null);
+
   const [myPets, setMyPets] = useState([]);
 
+  const [requests, setRequests] = useState([]);
 
   useEffect(() => {
     if (user?.email) {
       fetch(`http://localhost:5000/my-pets?email=${user.email}`)
         .then((res) => res.json())
-
         .then((data) => setMyPets(data));
     }
   }, [user]);
 
-  // Delete Pet
+  useEffect(() => {
+    if (selectedPet?._id) {
+      fetch(`http://localhost:5000/pet-requests/${selectedPet._id}`)
+        .then((res) => res.json())
+        .then((data) => setRequests(data));
+    }
+  }, [selectedPet]);
+
   const handleDelete = (_id) => {
     Swal.fire({
       title: "Are you sure?",
@@ -30,31 +40,28 @@ const MyListings = () => {
       confirmButtonColor: "#f97316",
       cancelButtonColor: "#ef4444",
       confirmButtonText: "Yes, Delete",
-    })
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const response = await fetch(`http://localhost:5000/pets/${_id}`, {
+          method: "DELETE",
+        });
 
-      .then(async (result) => {
-        if (result.isConfirmed) {
-          const response = await fetch(`http://localhost:5000/pets/${_id}`, {
-            method: "DELETE",
+        const data = await response.json();
+
+        if (data.deletedCount > 0) {
+          const remainingPets = myPets.filter((pet) => pet._id !== _id);
+
+          setMyPets(remainingPets);
+
+          Swal.fire({
+            icon: "success",
+            title: "Pet Deleted Successfully",
           });
-
-          const data = await response.json();
-
-          if (data.deletedCount > 0) {
-            const remainingPets = myPets.filter((pet) => pet._id !== _id);
-
-            setMyPets(remainingPets);
-
-            Swal.fire({
-              icon: "success",
-              title: "Pet Deleted Successfully",
-            });
-          }
         }
-      });
+      }
+    });
   };
 
-  // Update Pet
   const handleUpdatePet = async (e) => {
     e.preventDefault();
 
@@ -117,6 +124,96 @@ const MyListings = () => {
     }
   };
 
+  const handleApprove = async (requestId, petId) => {
+    const response = await fetch(
+      `http://localhost:5000/requests/status/${requestId}`,
+      {
+        method: "PATCH",
+
+        headers: {
+          "content-type": "application/json",
+        },
+
+        body: JSON.stringify({
+          status: "approved",
+          petId,
+        }),
+      },
+    );
+
+    const data = await response.json();
+
+    if (data.modifiedCount > 0) {
+      const updatedRequests = requests.map((request) =>
+        request._id === requestId
+          ? {
+              ...request,
+              status: "approved",
+            }
+          : {
+              ...request,
+              status:
+                request.status === "pending" ? "rejected" : request.status,
+            },
+      );
+
+      setRequests(updatedRequests);
+
+      const updatedPets = myPets.map((pet) =>
+        pet._id === petId
+          ? {
+              ...pet,
+              status: "adopted",
+            }
+          : pet,
+      );
+
+      setMyPets(updatedPets);
+
+      Swal.fire({
+        icon: "success",
+        title: "Request Approved Successfully",
+      });
+    }
+  };
+
+  const handleReject = async (requestId, petId) => {
+    const response = await fetch(
+      `http://localhost:5000/requests/status/${requestId}`,
+      {
+        method: "PATCH",
+
+        headers: {
+          "content-type": "application/json",
+        },
+
+        body: JSON.stringify({
+          status: "rejected",
+          petId,
+        }),
+      },
+    );
+
+    const data = await response.json();
+
+    if (data.modifiedCount > 0) {
+      const updatedRequests = requests.map((request) =>
+        request._id === requestId
+          ? {
+              ...request,
+              status: "rejected",
+            }
+          : request,
+      );
+
+      setRequests(updatedRequests);
+
+      Swal.fire({
+        icon: "success",
+        title: "Request Rejected Successfully",
+      });
+    }
+  };
   return (
     <div className="min-h-screen">
       <div className="mb-10">
@@ -124,8 +221,8 @@ const MyListings = () => {
 
         <p className="text-gray-600">Manage all your pet listings from here.</p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
 
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         <div className="bg-white rounded-3xl shadow-lg p-6">
           <h3 className="text-gray-500 mb-2">Total Listings</h3>
 
@@ -133,6 +230,7 @@ const MyListings = () => {
             {myPets.length}
           </h2>
         </div>
+
         <div className="bg-white rounded-3xl shadow-lg p-6">
           <h3 className="text-gray-500 mb-2">Available Pets</h3>
 
@@ -161,18 +259,15 @@ const MyListings = () => {
               alt={pet.petName}
               className="w-full h-72 object-cover"
             />
+
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
                 <span
-                  className={`
-                      px-4 py-1 rounded-full text-sm font-semibold
-
-                      ${
-                        pet.status === "Available"
-                          ? "bg-green-100 text-green-600"
-                          : "bg-red-100 text-red-600"
-                      }
-                    `}
+                  className={`px-4 py-1 rounded-full text-sm font-semibold ${
+                    pet.status === "Available"
+                      ? "bg-green-100 text-green-600"
+                      : "bg-red-100 text-red-600"
+                  }`}
                 >
                   {pet.status}
                 </span>
@@ -181,9 +276,11 @@ const MyListings = () => {
                   ৳ {pet.fee}
                 </h3>
               </div>
+
               <h2 className="text-3xl font-bold text-gray-800 mb-6">
                 {pet.petName}
               </h2>
+
               <div className="grid grid-cols-2 gap-4">
                 <button
                   onClick={() => setSelectedPet(pet)}
@@ -192,6 +289,7 @@ const MyListings = () => {
                   <FaClipboardList />
                   Requests
                 </button>
+
                 <button
                   onClick={() => setUpdatePet(pet)}
                   className="flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-xl transition"
@@ -199,6 +297,7 @@ const MyListings = () => {
                   <FaEdit />
                   Edit
                 </button>
+
                 <Link
                   to={`/all-pets/${pet._id}`}
                   className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl transition"
@@ -234,26 +333,25 @@ const MyListings = () => {
               Adoption Requests for {selectedPet.petName}
             </h2>
 
-            {!selectedPet.requests && (
+            {requests.length === 0 && (
               <p className="text-gray-500">No Requests Found</p>
             )}
 
             <div className="space-y-5">
-              {selectedPet.requests?.map((request) => (
+              {requests.map((request) => (
                 <div
-                  key={request.id}
+                  key={request._id}
                   className="border border-gray-200 rounded-2xl p-5"
                 >
-
                   <div className="space-y-2 mb-5">
                     <p>
                       <span className="font-semibold">User Name:</span>{" "}
-                      {request.userName}
+                      {request.requesterName}
                     </p>
 
                     <p>
                       <span className="font-semibold">Email:</span>{" "}
-                      {request.email}
+                      {request.requesterEmail}
                     </p>
 
                     <p>
@@ -264,28 +362,34 @@ const MyListings = () => {
                     <p>
                       <span className="font-semibold">Status:</span>{" "}
                       <span
-                        className={`
-                                font-semibold
-
-                                ${
-                                  request.status === "Approved"
-                                    ? "text-green-500"
-                                    : request.status === "Rejected"
-                                      ? "text-red-500"
-                                      : "text-yellow-500"
-                                }
-                              `}
+                        className={`font-semibold ${
+                          request.status === "Approved"
+                            ? "text-green-500"
+                            : request.status === "Rejected"
+                              ? "text-red-500"
+                              : "text-yellow-500"
+                        }`}
                       >
                         {request.status}
                       </span>
                     </p>
                   </div>
+
                   {request.status === "Pending" && (
                     <div className="flex gap-4">
-                      <button className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-xl transition">
+                      <button
+                        onClick={() =>
+                          handleApprove(request._id, selectedPet._id)
+                        }
+                        className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-xl transition"
+                      >
                         Approve
                       </button>
-                      <button className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-xl transition">
+
+                      <button
+                        onClick={() => handleReject(request._id)}
+                        className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-xl transition"
+                      >
                         Reject
                       </button>
                     </div>
@@ -296,6 +400,7 @@ const MyListings = () => {
           </div>
         </div>
       )}
+
       {updatePet && (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 px-4">
           <div className="bg-white w-full max-w-4xl rounded-3xl p-6 lg:p-8 relative max-h-[90vh] overflow-y-auto">
@@ -309,6 +414,7 @@ const MyListings = () => {
             <h2 className="text-3xl font-bold mb-8 text-gray-800">
               Update Pet
             </h2>
+
             <form
               onSubmit={handleUpdatePet}
               className="grid grid-cols-1 md:grid-cols-2 gap-6"
@@ -324,6 +430,7 @@ const MyListings = () => {
                   required
                 />
               </div>
+
               <div>
                 <label className="block mb-2 font-semibold">Species</label>
 
@@ -335,6 +442,7 @@ const MyListings = () => {
                   required
                 />
               </div>
+
               <div>
                 <label className="block mb-2 font-semibold">Breed</label>
 
@@ -346,6 +454,7 @@ const MyListings = () => {
                   required
                 />
               </div>
+
               <div>
                 <label className="block mb-2 font-semibold">Age</label>
 
@@ -357,6 +466,7 @@ const MyListings = () => {
                   required
                 />
               </div>
+
               <div>
                 <label className="block mb-2 font-semibold">Gender</label>
 
@@ -368,6 +478,7 @@ const MyListings = () => {
                   required
                 />
               </div>
+
               <div>
                 <label className="block mb-2 font-semibold">Image URL</label>
 
@@ -379,6 +490,7 @@ const MyListings = () => {
                   required
                 />
               </div>
+
               <div>
                 <label className="block mb-2 font-semibold">
                   Health Status
@@ -392,6 +504,7 @@ const MyListings = () => {
                   required
                 />
               </div>
+
               <div>
                 <label className="block mb-2 font-semibold">Vaccination</label>
 
@@ -403,6 +516,7 @@ const MyListings = () => {
                   required
                 />
               </div>
+
               <div>
                 <label className="block mb-2 font-semibold">Location</label>
 
@@ -414,6 +528,7 @@ const MyListings = () => {
                   required
                 />
               </div>
+
               <div>
                 <label className="block mb-2 font-semibold">Adoption Fee</label>
 
@@ -437,6 +552,7 @@ const MyListings = () => {
                   required
                 ></textarea>
               </div>
+
               <div className="md:col-span-2">
                 <button
                   type="submit"

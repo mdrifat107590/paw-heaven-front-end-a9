@@ -13,33 +13,71 @@ const PetDetails = () => {
 
   const [pet, setPet] = useState({});
 
+  const [loading, setLoading] = useState(true);
+
+  const [alreadyRequested, setAlreadyRequested] = useState(false);
+
   useEffect(() => {
     fetch(`http://localhost:5000/pets/${id}`)
       .then((res) => res.json())
-
-      .then((data) => setPet(data));
+      .then((data) => {
+        setPet(data);
+        setLoading(false);
+      });
   }, [id]);
 
-  // Handle Adoption Request
+  useEffect(() => {
+    if (user?.email && pet?._id) {
+      fetch(
+        `http://localhost:5000/requests/check?petId=${pet._id}&email=${user.email}`,
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          setAlreadyRequested(data.exists);
+        });
+    }
+  }, [user, pet]);
+
+  const isOwner = user?.email === pet?.ownerEmail;
+
+  const isAdopted = pet?.status === "adopted";
+
   const handleAdoption = async (e) => {
     e.preventDefault();
+
+    if (isOwner) {
+      return Swal.fire({
+        icon: "warning",
+        title: "You cannot adopt your own pet",
+      });
+    }
+
+    if (isAdopted) {
+      return Swal.fire({
+        icon: "warning",
+        title: "This pet is already adopted",
+      });
+    }
+
+    if (alreadyRequested) {
+      return Swal.fire({
+        icon: "warning",
+        title: "You already requested this pet",
+      });
+    }
 
     const form = e.target;
 
     const adoptionData = {
       petId: pet._id,
       petName: pet.petName,
-
+      petImage: pet.image,
       requesterName: user?.displayName,
-
       requesterEmail: user?.email,
-
+      ownerEmail: pet.ownerEmail,
       pickupDate: form.pickupDate.value,
-
       message: form.message.value,
-
-      status: "Pending",
-
+      status: "pending",
       requestDate: new Date(),
     };
 
@@ -57,6 +95,8 @@ const PetDetails = () => {
       const data = await response.json();
 
       if (data.insertedId) {
+        setAlreadyRequested(true);
+
         Swal.fire({
           icon: "success",
           title: "Adoption Request Submitted",
@@ -71,6 +111,14 @@ const PetDetails = () => {
       });
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <span className="loading loading-spinner loading-lg text-orange-500"></span>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-50 min-h-screen py-16">
@@ -215,6 +263,7 @@ const PetDetails = () => {
                   name="pickupDate"
                   className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-orange-500"
                   required
+                  disabled={isOwner || isAdopted || alreadyRequested}
                 />
               </div>
 
@@ -229,14 +278,29 @@ const PetDetails = () => {
                   placeholder="Why do you want to adopt this pet?"
                   className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-orange-500 resize-none"
                   required
+                  disabled={isOwner || isAdopted || alreadyRequested}
                 ></textarea>
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl text-lg font-semibold transition"
+                disabled={isOwner || isAdopted || alreadyRequested}
+                className={`w-full py-4 rounded-2xl text-lg font-semibold transition text-white
+                  
+                  ${
+                    isOwner || isAdopted || alreadyRequested
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-orange-500 hover:bg-orange-600"
+                  }
+                `}
               >
-                Adopt Now
+                {isOwner
+                  ? "You Own This Pet"
+                  : isAdopted
+                    ? "Already Adopted"
+                    : alreadyRequested
+                      ? "Request Already Sent"
+                      : "Adopt Now"}
               </button>
             </form>
           </div>
