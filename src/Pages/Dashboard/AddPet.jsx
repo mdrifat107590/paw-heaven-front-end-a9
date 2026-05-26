@@ -5,15 +5,56 @@ import { AuthContext } from "../../context/AuthContext";
 const AddPet = () => {
   const { user } = useContext(AuthContext);
 
-  const handleAddPet = (e) => {
+  const handleAddPet = async (e) => {
     e.preventDefault();
 
-    Swal.fire({
-      icon: "success",
-      title: "Pet Added Successfully",
-    });
-  };
+    const form = e.target;
 
+    const petData = {
+      petName: form.petName.value,
+      species: form.species.value,
+      breed: form.breed.value,
+      age: form.age.value,
+      gender: form.gender.value,
+      image: form.image.value,
+      health: form.health.value,
+      vaccination: form.vaccination.value,
+      location: form.location.value,
+      fee: form.fee.value,
+      description: form.description.value,
+      ownerEmail: user?.email,
+      status: "Available",
+      createdAt: new Date(),
+    };
+
+    try {
+      const response = await fetch("http://localhost:5000/pets", {
+        method: "POST",
+
+        headers: {
+          "content-type": "application/json",
+        },
+
+        body: JSON.stringify(petData),
+      });
+
+      const data = await response.json();
+      console.log(data)
+      if (data.result.insertedId) {
+        Swal.fire({
+          icon: "success",
+          title: "Pet Added Successfully",
+        });
+
+        form.reset();
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: error.message,
+      });
+    }
+  };
   return (
     <div className="min-h-screen">
       <div className="mb-10">
@@ -194,7 +235,7 @@ const AddPet = () => {
           <div className="md:col-span-2">
             <button
               type="submit"
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl text-lg font-semibold transition"
+              className="w-full cursor-pointer bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl text-lg font-semibold transition"
             >
               Add Pet
             </button>
