@@ -30,16 +30,15 @@ const AddPet = () => {
     try {
       const response = await fetch("http://localhost:5000/pets", {
         method: "POST",
-
         headers: {
           "content-type": "application/json",
         },
-
+        credentials: "include",
         body: JSON.stringify(petData),
       });
 
       const data = await response.json();
-      console.log(data)
+      console.log(data);
       if (data.result.insertedId) {
         Swal.fire({
           icon: "success",

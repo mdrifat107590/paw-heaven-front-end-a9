@@ -1,37 +1,36 @@
 import { Link, NavLink } from "react-router-dom";
-
 import { HiMenuAlt3, HiX } from "react-icons/hi";
-
 import { useContext, useState } from "react";
-
 import Swal from "sweetalert2";
-
 import { AuthContext } from "../context/AuthContext";
-
 import { FaUserCircle } from "react-icons/fa";
 
 const Navbar = () => {
   const { user, logOut } = useContext(AuthContext);
-
   const [isOpen, setIsOpen] = useState(false);
-
   const [profileOpen, setProfileOpen] = useState(false);
 
-  const handleLogout = () => {
-    logOut()
-      .then(() => {
-        Swal.fire({
-          icon: "success",
-
-          title: "Logout Successful",
-        });
-
-        setProfileOpen(false);
-      })
-
-      .catch((error) => {
-        console.log(error);
+  const handleLogout = async () => {
+    try {
+      await fetch("http://localhost:5000/logout", {
+        method: "POST",
+        credentials: "include",
       });
+
+      await logOut();
+      Swal.fire({
+        icon: "success",
+        title: "Logout Successful",
+      });
+
+      setProfileOpen(false);
+    } catch (error) {
+      console.log(error);
+      Swal.fire({
+        icon: "error",
+        title: error.message,
+      });
+    }
   };
 
   const closeMenu = () => setIsOpen(false);

@@ -18,7 +18,9 @@ const PetDetails = () => {
   const [alreadyRequested, setAlreadyRequested] = useState(false);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/pets/${id}`)
+    fetch(`http://localhost:5000/pets/${id}`, {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data) => {
         setPet(data);
@@ -39,26 +41,21 @@ const PetDetails = () => {
   }, [user, pet]);
 
   const isOwner = user?.email === pet?.ownerEmail;
-
   const isAdopted = pet?.status === "adopted";
-
   const handleAdoption = async (e) => {
     e.preventDefault();
-
     if (isOwner) {
       return Swal.fire({
         icon: "warning",
         title: "You cannot adopt your own pet",
       });
     }
-
     if (isAdopted) {
       return Swal.fire({
         icon: "warning",
         title: "This pet is already adopted",
       });
     }
-
     if (alreadyRequested) {
       return Swal.fire({
         icon: "warning",
@@ -67,7 +64,6 @@ const PetDetails = () => {
     }
 
     const form = e.target;
-
     const adoptionData = {
       petId: pet._id,
       petName: pet.petName,
@@ -84,11 +80,10 @@ const PetDetails = () => {
     try {
       const response = await fetch("http://localhost:5000/requests", {
         method: "POST",
-
+        credentials: "include",
         headers: {
           "content-type": "application/json",
         },
-
         body: JSON.stringify(adoptionData),
       });
 

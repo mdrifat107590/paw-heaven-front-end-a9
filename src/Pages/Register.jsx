@@ -1,27 +1,45 @@
 import { Link, useNavigate } from "react-router-dom";
+
 import { FcGoogle } from "react-icons/fc";
-import { useContext } from "react";
+
+import { useContext, useState } from "react";
+
 import Swal from "sweetalert2";
+
 import { AuthContext } from "../context/AuthContext";
 
 const Register = () => {
   const { createUser, updateUser, googleLogin } = useContext(AuthContext);
+
   const navigate = useNavigate();
 
-  const handleRegister = (e) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleRegister = async (e) => {
     e.preventDefault();
+
+    setLoading(true);
+
     const form = e.target;
+
     const name = form.name.value;
+
     const email = form.email.value;
+
     const photo = form.photo.value;
+
     const password = form.password.value;
+
     const confirmPassword = form.confirmPassword.value;
 
     if (password.length < 6) {
       Swal.fire({
         icon: "error",
+
         title: "Password must be at least 6 characters",
       });
+
+      setLoading(false);
 
       return;
     }
@@ -29,8 +47,11 @@ const Register = () => {
     if (!/[A-Z]/.test(password)) {
       Swal.fire({
         icon: "error",
+
         title: "Password must contain one uppercase letter",
       });
+
+      setLoading(false);
 
       return;
     }
@@ -38,8 +59,11 @@ const Register = () => {
     if (!/[a-z]/.test(password)) {
       Swal.fire({
         icon: "error",
+
         title: "Password must contain one lowercase letter",
       });
+
+      setLoading(false);
 
       return;
     }
@@ -47,66 +71,97 @@ const Register = () => {
     if (password !== confirmPassword) {
       Swal.fire({
         icon: "error",
+
         title: "Passwords do not match",
       });
+
+      setLoading(false);
 
       return;
     }
 
+    try {
+      const result = await createUser(email, password);
 
+      await updateUser({
+        displayName: name,
 
-    createUser(email, password)
-      .then((result) => {
-        updateUser({
-          displayName: name,
-          photoURL: photo,
-        })
-          .then(() => {
-            Swal.fire({
-              icon: "success",
-              title: "Registration Successful",
-            });
-
-            navigate("/");
-          })
-
-          .catch((error) => {
-            console.log(error);
-          });
-
-        console.log(result.user);
-      })
-
-      .catch((error) => {
-        Swal.fire({
-          icon: "error",
-          title: error.message,
-        });
+        photoURL: photo,
       });
+
+      await fetch("http://localhost:5000/jwt", {
+        method: "POST",
+
+        headers: {
+          "content-type": "application/json",
+        },
+
+        credentials: "include",
+
+        body: JSON.stringify({
+          email: result.user.email,
+        }),
+      });
+
+      Swal.fire({
+        icon: "success",
+
+        title: "Registration Successful",
+      });
+
+      navigate("/");
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+
+        title: error.message,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
-  const handleGoogleLogin = () => {
-      googleLogin()
-        .then((result) => {
-          console.log(result.user);
-  
-          Swal.fire({
-            icon: "success",
-            title: "Google Login Successful",
-          });
-  
-          navigate("/");
-        })
-        .catch((error) => {
-          Swal.fire({
-            icon: "error",
-            title: error.message,
-          });
-        });
-    };
+
+  const handleGoogleLogin = async () => {
+    try {
+      setLoading(true);
+
+      const result = await googleLogin();
+
+      await fetch("http://localhost:5000/jwt", {
+        method: "POST",
+
+        headers: {
+          "content-type": "application/json",
+        },
+
+        credentials: "include",
+
+        body: JSON.stringify({
+          email: result.user.email,
+        }),
+      });
+
+      Swal.fire({
+        icon: "success",
+
+        title: "Google Login Successful",
+      });
+
+      navigate("/");
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+
+        title: error.message,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-orange-50 flex justify-center items-center px-4 py-16">
       <div className="w-full max-w-lg bg-white rounded-3xl shadow-xl p-8">
-        {/* Title */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-3">Create Account</h1>
 
@@ -177,9 +232,10 @@ const Register = () => {
 
           <button
             type="submit"
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-xl text-lg font-semibold transition"
+            disabled={loading}
+            className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white py-3 rounded-xl text-lg font-semibold transition"
           >
-            Register
+            {loading ? "Processing..." : "Register"}
           </button>
 
           <div className="flex items-center gap-4">
@@ -193,7 +249,8 @@ const Register = () => {
           <button
             type="button"
             onClick={handleGoogleLogin}
-            className="w-full border border-gray-300 hover:bg-gray-100 py-3 rounded-xl font-semibold transition flex justify-center items-center gap-3"
+            disabled={loading}
+            className="w-full border border-gray-300 hover:bg-gray-100 disabled:bg-gray-100 py-3 rounded-xl font-semibold transition flex justify-center items-center gap-3"
           >
             <FcGoogle size={24} />
             Continue with Google

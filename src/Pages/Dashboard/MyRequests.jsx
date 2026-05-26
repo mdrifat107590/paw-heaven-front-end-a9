@@ -14,7 +14,9 @@ const MyRequests = () => {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     if (user?.email) {
-      fetch(`http://localhost:5000/requests?email=${user.email}`)
+      fetch(`http://localhost:5000/requests?email=${user.email}`, {
+        credentials: "include",
+      })
         .then((res) => res.json())
         .then((data) => {
           setRequests(data);
@@ -40,6 +42,7 @@ const MyRequests = () => {
             `http://localhost:5000/requests/${_id}`,
             {
               method: "DELETE",
+              credentials: "include",
             },
           );
 
