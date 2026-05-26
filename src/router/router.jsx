@@ -1,18 +1,16 @@
 import { createBrowserRouter } from "react-router-dom";
-
 import MainLayout from "../layout/MainLayout";
-import DashboardLayout from "../layout/DashboardLayout"
-
-
+import DashboardLayout from "../layout/DashboardLayout";
 import MyRequests from "../Pages/Dashboard/MyRequests";
 import MyListings from "../Pages/Dashboard/MyListings";
 import AddPet from "../Pages/Dashboard/AddPet";
 import ErrorPage from "../Pages/ErrorPage";
 import Home from "../Pages/Home";
-import AllPets from "../Pages/AllPets"
+import AllPets from "../Pages/AllPets";
 import PetDetails from "../Pages/PetDetails";
 import Login from "../Pages/Login";
 import Register from "../Pages/Register";
+import PrivateRoute from "./PrivateRoute";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -29,7 +27,11 @@ const router = createBrowserRouter([
       },
       {
         path: "/pet/:id",
-        element: <PetDetails />,
+        element: (
+          <PrivateRoute>
+            <PetDetails />
+          </PrivateRoute>
+        ),
       },
       {
         path: "/login",
@@ -44,7 +46,11 @@ const router = createBrowserRouter([
 
   {
     path: "/dashboard",
-    element: <DashboardLayout />,
+    element: (
+      <PrivateRoute>
+        <DashboardLayout />
+      </PrivateRoute>
+    ),
     children: [
       {
         path: "add-pet",

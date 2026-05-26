@@ -35,20 +35,17 @@ const Navbar = () => {
           All Pets
         </NavLink>
       </li>
-      {user && (
-        <>
-          <li>
-            <NavLink to="/dashboard/my-requests" onClick={closeMenu}>
-              My Requests
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/dashboard/add-pet" onClick={closeMenu}>
-              Add Pet
-            </NavLink>
-          </li>
-        </>
-      )}
+
+      <li>
+        <NavLink to="/dashboard/my-requests" onClick={closeMenu}>
+          My Requests
+        </NavLink>
+      </li>
+      <li>
+        <NavLink to="/dashboard/add-pet" onClick={closeMenu}>
+          Add Pet
+        </NavLink>
+      </li>
     </>
   );
 
