@@ -1,13 +1,11 @@
 import { Link } from "react-router-dom";
-
+import { FcGoogle } from "react-icons/fc";
 const Login = () => {
   return (
     <div className="min-h-screen bg-orange-50 flex justify-center items-center px-4 py-16">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-3">
-            Welcome Back
-          </h1>
+          <h1 className="text-4xl font-bold mb-3">Welcome Back</h1>
           <p className="text-gray-600">
             Login to continue your pet adoption journey.
           </p>
@@ -15,9 +13,7 @@ const Login = () => {
 
         <form className="space-y-5">
           <div>
-            <label className="block mb-2 font-semibold">
-              Email Address
-            </label>
+            <label className="block mb-2 font-semibold">Email Address</label>
             <input
               type="email"
               placeholder="Enter your email"
@@ -26,9 +22,7 @@ const Login = () => {
           </div>
 
           <div>
-            <label className="block mb-2 font-semibold">
-              Password
-            </label>
+            <label className="block mb-2 font-semibold">Password</label>
             <input
               type="password"
               placeholder="Enter your password"
@@ -46,15 +40,15 @@ const Login = () => {
 
         <div className="flex items-center gap-4 my-6">
           <div className="flex-1 h-[1px] bg-gray-300"></div>
-          <p className="text-gray-500">
-            OR
-          </p>
+          <p className="text-gray-500">OR</p>
           <div className="flex-1 h-[1px] bg-gray-300"></div>
         </div>
 
         <button
-          className="w-full border border-gray-300 hover:bg-gray-100 py-3 rounded-xl font-semibold transition"
+          type="button"
+          className="w-full border border-gray-300 hover:bg-gray-100 py-3 rounded-xl font-semibold transition flex justify-center items-center gap-3"
         >
+          <FcGoogle size={24} />
           Continue with Google
         </button>
 
