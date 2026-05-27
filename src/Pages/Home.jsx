@@ -15,7 +15,7 @@ const Home = () => {
 
       .then((data) => {
         setFeaturedPets(data);
-
+        console.log(data)
         setLoading(false);
       });
   }, []);

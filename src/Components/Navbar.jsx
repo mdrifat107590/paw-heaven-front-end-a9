@@ -65,7 +65,6 @@ const Navbar = () => {
         </NavLink>
       </li>
 
-      {user && (
         <>
           <li>
             <NavLink
@@ -95,7 +94,6 @@ const Navbar = () => {
             </NavLink>
           </li>
         </>
-      )}
     </>
   );
 

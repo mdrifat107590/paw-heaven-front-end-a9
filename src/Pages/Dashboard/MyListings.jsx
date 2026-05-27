@@ -504,6 +504,106 @@ const MyListings = () => {
                   required
                 />
               </div>
+
+              <div>
+                <label className="block mb-2 font-semibold">Gender</label>
+
+                <select
+                  name="gender"
+                  defaultValue={updatePet.gender}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-orange-500"
+                  required
+                >
+                  <option value="Male">Male</option>
+
+                  <option value="Female">Female</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block mb-2 font-semibold">Image URL</label>
+
+                <input
+                  type="text"
+                  name="image"
+                  defaultValue={updatePet.image}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-orange-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block mb-2 font-semibold">
+                  Health Status
+                </label>
+
+                <input
+                  type="text"
+                  name="health"
+                  defaultValue={updatePet.health}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-orange-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block mb-2 font-semibold">
+                  Vaccination Status
+                </label>
+
+                <input
+                  type="text"
+                  name="vaccination"
+                  defaultValue={updatePet.vaccination}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-orange-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block mb-2 font-semibold">Location</label>
+
+                <input
+                  type="text"
+                  name="location"
+                  defaultValue={updatePet.location}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-orange-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block mb-2 font-semibold">Adoption Fee</label>
+
+                <input
+                  type="number"
+                  name="fee"
+                  defaultValue={updatePet.fee}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-orange-500"
+                  required
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block mb-2 font-semibold">Description</label>
+
+                <textarea
+                  name="description"
+                  rows="5"
+                  defaultValue={updatePet.description}
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-orange-500 resize-none"
+                  required
+                ></textarea>
+              </div>
+
+              <div className="md:col-span-2 flex justify-end mt-4">
+                <button
+                  type="submit"
+                  className="w-full md:w-auto bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold px-8 py-3.5 rounded-xl shadow-md hover:shadow-lg transform active:scale-95 transition-all duration-200"
+                >
+                  Update Now
+                </button>
+              </div>
             </form>
           </div>
         </div>
