@@ -10,7 +10,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:5000/featured-pets")
+    fetch("https://pet-heaven-server-a9.onrender.com/featured-pets")
       .then((res) => res.json())
 
       .then((data) => {

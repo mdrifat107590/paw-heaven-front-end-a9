@@ -15,6 +15,29 @@ const Register = () => {
 
   const [loading, setLoading] = useState(false);
 
+  const saveUserToken = async (email) => {
+    const response = await fetch(
+      "https://pet-heaven-server-a9.onrender.com/jwt",
+      {
+        method: "POST",
+
+        headers: {
+          "content-type": "application/json",
+        },
+
+        credentials: "include",
+
+        body: JSON.stringify({
+          email,
+        }),
+      },
+    );
+
+    const data = await response.json();
+
+    return data;
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
 
@@ -89,19 +112,7 @@ const Register = () => {
         photoURL: photo,
       });
 
-      await fetch("http://localhost:5000/jwt", {
-        method: "POST",
-
-        headers: {
-          "content-type": "application/json",
-        },
-
-        credentials: "include",
-
-        body: JSON.stringify({
-          email: result.user.email,
-        }),
-      });
+      await saveUserToken(result.user.email);
 
       Swal.fire({
         icon: "success",
@@ -127,19 +138,7 @@ const Register = () => {
 
       const result = await googleLogin();
 
-      await fetch("http://localhost:5000/jwt", {
-        method: "POST",
-
-        headers: {
-          "content-type": "application/json",
-        },
-
-        credentials: "include",
-
-        body: JSON.stringify({
-          email: result.user.email,
-        }),
-      });
+      await saveUserToken(result.user.email);
 
       Swal.fire({
         icon: "success",

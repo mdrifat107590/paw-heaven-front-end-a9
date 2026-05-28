@@ -12,7 +12,7 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost:5000/logout", {
+      await fetch("https://pet-heaven-server-a9.onrender.com/logout", {
         method: "POST",
         credentials: "include",
       });

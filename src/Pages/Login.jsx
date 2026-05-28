@@ -1,11 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
-
 import { FcGoogle } from "react-icons/fc";
-
 import { useContext, useState } from "react";
-
 import Swal from "sweetalert2";
-
 import { AuthContext } from "../context/AuthContext";
 
 const Login = () => {
@@ -15,32 +11,56 @@ const Login = () => {
 
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    const form = e.target;
-    const email = form.email.value;
-    const password = form.password.value;
-    try {
-      const result = await signInUser(email, password);
-      await fetch("http://localhost:5000/jwt", {
+  const saveUserToken = async (email) => {
+    const response = await fetch(
+      "https://pet-heaven-server-a9.onrender.com/jwt",
+      {
         method: "POST",
+
         headers: {
           "content-type": "application/json",
         },
+
         credentials: "include",
+
         body: JSON.stringify({
-          email: result.user.email,
+          email,
         }),
-      });
+      },
+    );
+
+    const data = await response.json();
+
+    return data;
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    setLoading(true);
+
+    const form = e.target;
+
+    const email = form.email.value;
+
+    const password = form.password.value;
+
+    try {
+      const result = await signInUser(email, password);
+
+      await saveUserToken(result.user.email);
+
       Swal.fire({
         icon: "success",
+
         title: "Login Successful",
       });
+
       navigate("/");
     } catch (error) {
       Swal.fire({
         icon: "error",
+
         title: error.message,
       });
     } finally {
@@ -51,26 +71,22 @@ const Login = () => {
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
+
       const result = await googleLogin();
-      await fetch("http://localhost:5000/jwt", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          email: result.user.email,
-        }),
-      });
+
+      await saveUserToken(result.user.email);
 
       Swal.fire({
         icon: "success",
+
         title: "Google Login Successful",
       });
+
       navigate("/");
     } catch (error) {
       Swal.fire({
         icon: "error",
+
         title: error.message,
       });
     } finally {

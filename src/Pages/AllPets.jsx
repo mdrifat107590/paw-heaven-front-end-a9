@@ -12,7 +12,7 @@ const AllPets = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/pets?search=${searchText}&species=${species}`)
+    fetch(`https://pet-heaven-server-a9.onrender.com/pets?search=${searchText}&species=${species}`)
       .then((res) => res.json())
       .then((data) => {
         setPets(data);

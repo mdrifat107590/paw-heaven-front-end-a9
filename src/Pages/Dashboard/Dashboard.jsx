@@ -11,11 +11,11 @@ const DashboardHome = () => {
   useEffect(() => {
     if (user?.email) {
       Promise.all([
-        fetch(`http://localhost:5000/my-pets?email=${user.email}`).then((res) =>
+        fetch(`https://pet-heaven-server-a9.onrender.com/my-pets?email=${user.email}`).then((res) =>
           res.json(),
         ),
 
-        fetch(`http://localhost:5000/requests?email=${user.email}`).then(
+        fetch(`https://pet-heaven-server-a9.onrender.com/requests?email=${user.email}`).then(
           (res) => res.json(),
         ),
       ])

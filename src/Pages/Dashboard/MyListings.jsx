@@ -19,45 +19,105 @@ const MyListings = () => {
 
   const [requests, setRequests] = useState([]);
 
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     if (user?.email) {
-      fetch(`http://localhost:5000/my-pets?email=${user.email}`, {
-        credentials: "include",
-      })
-        .then((res) => res.json())
+      fetch(
+        `https://pet-heaven-server-a9.onrender.com/my-pets?email=${user.email}`,
+        {
+          credentials: "include",
+        },
+      )
+        .then(async (res) => {
+          if (res.status === 401 || res.status === 403) {
+            setMyPets([]);
 
-        .then((data) => setMyPets(data));
+            setLoading(false);
+
+            return [];
+          }
+
+          return res.json();
+        })
+
+        .then((data) => {
+          if (Array.isArray(data)) {
+            setMyPets(data);
+          } else {
+            setMyPets([]);
+          }
+
+          setLoading(false);
+        })
+
+        .catch(() => {
+          setMyPets([]);
+
+          setLoading(false);
+        });
     }
   }, [user]);
 
   useEffect(() => {
     if (selectedPet?._id) {
-      fetch(`http://localhost:5000/pet-requests/${selectedPet._id}`, {
-        credentials: "include",
-      })
-        .then((res) => res.json())
+      fetch(
+        `https://pet-heaven-server-a9.onrender.com/pet-requests/${selectedPet._id}`,
+        {
+          credentials: "include",
+        },
+      )
+        .then(async (res) => {
+          if (res.status === 401 || res.status === 403) {
+            setRequests([]);
 
-        .then((data) => setRequests(data));
+            return [];
+          }
+
+          return res.json();
+        })
+
+        .then((data) => {
+          if (Array.isArray(data)) {
+            setRequests(data);
+          } else {
+            setRequests([]);
+          }
+        })
+
+        .catch(() => {
+          setRequests([]);
+        });
     }
   }, [selectedPet]);
 
   const handleDelete = (_id) => {
     Swal.fire({
       title: "Are you sure?",
+
       text: "This pet will be deleted permanently!",
+
       icon: "warning",
+
       showCancelButton: true,
+
       confirmButtonColor: "#f97316",
+
       cancelButtonColor: "#ef4444",
+
       confirmButtonText: "Yes, Delete",
     })
 
       .then(async (result) => {
         if (result.isConfirmed) {
-          const response = await fetch(`http://localhost:5000/pets/${_id}`, {
-            method: "DELETE",
-            credentials: "include",
-          });
+          const response = await fetch(
+            `https://pet-heaven-server-a9.onrender.com/pets/${_id}`,
+            {
+              method: "DELETE",
+
+              credentials: "include",
+            },
+          );
 
           const data = await response.json();
 
@@ -83,26 +143,39 @@ const MyListings = () => {
 
     const updatedPet = {
       petName: form.petName.value,
+
       species: form.species.value,
+
       breed: form.breed.value,
+
       age: form.age.value,
+
       gender: form.gender.value,
+
       image: form.image.value,
+
       health: form.health.value,
+
       vaccination: form.vaccination.value,
+
       location: form.location.value,
+
       fee: form.fee.value,
+
       description: form.description.value,
     };
 
     const response = await fetch(
-      `http://localhost:5000/pets/${updatePet._id}`,
+      `https://pet-heaven-server-a9.onrender.com/pets/${updatePet._id}`,
       {
         method: "PATCH",
+
         credentials: "include",
+
         headers: {
           "content-type": "application/json",
         },
+
         body: JSON.stringify(updatedPet),
       },
     );
@@ -114,6 +187,7 @@ const MyListings = () => {
         pet._id === updatePet._id
           ? {
               ...pet,
+
               ...updatedPet,
             }
           : pet,
@@ -133,10 +207,12 @@ const MyListings = () => {
 
   const handleApprove = async (requestId, petId) => {
     const response = await fetch(
-      `http://localhost:5000/requests/status/${requestId}`,
+      `https://pet-heaven-server-a9.onrender.com/requests/status/${requestId}`,
       {
         method: "PATCH",
+
         credentials: "include",
+
         headers: {
           "content-type": "application/json",
         },
@@ -164,10 +240,12 @@ const MyListings = () => {
         request._id === requestId
           ? {
               ...request,
+
               status: "approved",
             }
           : {
               ...request,
+
               status:
                 request.status === "pending" ? "rejected" : request.status,
             },
@@ -179,6 +257,7 @@ const MyListings = () => {
         pet._id === petId
           ? {
               ...pet,
+
               status: "adopted",
             }
           : pet,
@@ -196,7 +275,7 @@ const MyListings = () => {
 
   const handleReject = async (requestId, petId) => {
     const response = await fetch(
-      `http://localhost:5000/requests/status/${requestId}`,
+      `https://pet-heaven-server-a9.onrender.com/requests/status/${requestId}`,
       {
         method: "PATCH",
 
@@ -229,6 +308,7 @@ const MyListings = () => {
         request._id === requestId
           ? {
               ...request,
+
               status: "rejected",
             }
           : request,
@@ -244,6 +324,14 @@ const MyListings = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <span className="loading loading-spinner loading-lg text-orange-500"></span>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen">
       <div className="mb-10">
@@ -252,105 +340,117 @@ const MyListings = () => {
         <p className="text-gray-600">Manage all your pet listings from here.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-        <div className="bg-white rounded-3xl shadow-lg p-6">
-          <h3 className="text-gray-500 mb-2">Total Listings</h3>
-
-          <h2 className="text-4xl font-bold text-orange-500">
-            {myPets.length}
+      {myPets.length === 0 ? (
+        <div className="bg-white rounded-3xl shadow-lg py-20 text-center">
+          <h2 className="text-3xl font-bold text-gray-400 mb-3">
+            No Pets Found
           </h2>
+
+          <p className="text-gray-500">You have not added any pets yet.</p>
         </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div className="bg-white rounded-3xl shadow-lg p-6">
+              <h3 className="text-gray-500 mb-2">Total Listings</h3>
 
-        <div className="bg-white rounded-3xl shadow-lg p-6">
-          <h3 className="text-gray-500 mb-2">Available Pets</h3>
-
-          <h2 className="text-4xl font-bold text-green-500">
-            {myPets.filter((pet) => pet.status === "available").length}
-          </h2>
-        </div>
-
-        <div className="bg-white rounded-3xl shadow-lg p-6">
-          <h3 className="text-gray-500 mb-2">Adopted Pets</h3>
-
-          <h2 className="text-4xl font-bold text-red-500">
-            {myPets.filter((pet) => pet.status === "adopted").length}
-          </h2>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {myPets.map((pet) => (
-          <div
-            key={pet._id}
-            className="bg-white rounded-3xl shadow-lg overflow-hidden"
-          >
-            <img
-              src={pet.image}
-              alt={pet.petName}
-              className="w-full h-72 object-cover"
-            />
-
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <span
-                  className={`px-4 py-1 rounded-full text-sm font-semibold
-
-                  ${
-                    pet.status === "available"
-                      ? "bg-green-100 text-green-600"
-                      : "bg-red-100 text-red-600"
-                  }
-                `}
-                >
-                  {pet.status}
-                </span>
-
-                <h3 className="text-2xl font-bold text-orange-500">
-                  ৳ {pet.fee}
-                </h3>
-              </div>
-
-              <h2 className="text-3xl font-bold text-gray-800 mb-6">
-                {pet.petName}
+              <h2 className="text-4xl font-bold text-orange-500">
+                {myPets.length}
               </h2>
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  onClick={() => setSelectedPet(pet)}
-                  className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl transition"
-                >
-                  <FaClipboardList />
-                  Requests
-                </button>
+            <div className="bg-white rounded-3xl shadow-lg p-6">
+              <h3 className="text-gray-500 mb-2">Available Pets</h3>
 
-                <button
-                  onClick={() => setUpdatePet(pet)}
-                  className="flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-xl transition"
-                >
-                  <FaEdit />
-                  Edit
-                </button>
+              <h2 className="text-4xl font-bold text-green-500">
+                {myPets.filter((pet) => pet.status === "available").length}
+              </h2>
+            </div>
 
-                <Link
-                  to={`/all-pets/${pet._id}`}
-                  className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl transition"
-                >
-                  <FaEye />
-                  View
-                </Link>
+            <div className="bg-white rounded-3xl shadow-lg p-6">
+              <h3 className="text-gray-500 mb-2">Adopted Pets</h3>
 
-                <button
-                  onClick={() => handleDelete(pet._id)}
-                  className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl transition"
-                >
-                  <FaTrash />
-                  Delete
-                </button>
-              </div>
+              <h2 className="text-4xl font-bold text-red-500">
+                {myPets.filter((pet) => pet.status === "adopted").length}
+              </h2>
             </div>
           </div>
-        ))}
-      </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {myPets.map((pet) => (
+              <div
+                key={pet._id}
+                className="bg-white rounded-3xl shadow-lg overflow-hidden"
+              >
+                <img
+                  src={pet.image}
+                  alt={pet.petName}
+                  className="w-full h-72 object-cover"
+                />
+
+                <div className="p-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <span
+                      className={`px-4 py-1 rounded-full text-sm font-semibold
+
+                        ${
+                          pet.status === "available"
+                            ? "bg-green-100 text-green-600"
+                            : "bg-red-100 text-red-600"
+                        }
+                      `}
+                    >
+                      {pet.status}
+                    </span>
+
+                    <h3 className="text-2xl font-bold text-orange-500">
+                      ৳ {pet.fee}
+                    </h3>
+                  </div>
+
+                  <h2 className="text-3xl font-bold text-gray-800 mb-6">
+                    {pet.petName}
+                  </h2>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      onClick={() => setSelectedPet(pet)}
+                      className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl transition"
+                    >
+                      <FaClipboardList />
+                      Requests
+                    </button>
+
+                    <button
+                      onClick={() => setUpdatePet(pet)}
+                      className="flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-xl transition"
+                    >
+                      <FaEdit />
+                      Edit
+                    </button>
+
+                    <Link
+                      to={`/all-pets/${pet._id}`}
+                      className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl transition"
+                    >
+                      <FaEye />
+                      View
+                    </Link>
+
+                    <button
+                      onClick={() => handleDelete(pet._id)}
+                      className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl transition"
+                    >
+                      <FaTrash />
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       {selectedPet && (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 px-4">

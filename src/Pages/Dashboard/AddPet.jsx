@@ -1,5 +1,7 @@
 import { useContext } from "react";
+
 import Swal from "sweetalert2";
+
 import { AuthContext } from "../../context/AuthContext";
 
 const AddPet = () => {
@@ -12,52 +14,82 @@ const AddPet = () => {
 
     const petData = {
       petName: form.petName.value,
+
       species: form.species.value,
+
       breed: form.breed.value,
+
       age: form.age.value,
+
       gender: form.gender.value,
+
       image: form.image.value,
+
       health: form.health.value,
+
       vaccination: form.vaccination.value,
+
       location: form.location.value,
+
       fee: form.fee.value,
+
       description: form.description.value,
+
       ownerEmail: user?.email,
-      status: "Available",
+
+      status: "available",
+
       createdAt: new Date(),
     };
 
     try {
-      const response = await fetch("http://localhost:5000/pets", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
+      const response = await fetch(
+        "https://pet-heaven-server-a9.onrender.com/pets",
+        {
+          method: "POST",
+
+          headers: {
+            "content-type": "application/json",
+          },
+
+          credentials: "include",
+
+          body: JSON.stringify(petData),
         },
-        credentials: "include",
-        body: JSON.stringify(petData),
-      });
+      );
 
       const data = await response.json();
+
       console.log(data);
-      if (data.result.insertedId) {
+
+      if (data.insertedId) {
         Swal.fire({
           icon: "success",
+
           title: "Pet Added Successfully",
         });
 
         form.reset();
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: data.message || "Failed To Add Pet",
+        });
       }
     } catch (error) {
       Swal.fire({
         icon: "error",
         title: error.message,
       });
+      console.log(error)
     }
   };
+
   return (
     <div className="min-h-screen">
       <div className="mb-10">
         <h1 className="text-4xl font-bold text-gray-800 mb-3">Add New Pet</h1>
+
         <p className="text-gray-600">
           Fill out the form below to add a pet for adoption.
         </p>
@@ -72,6 +104,7 @@ const AddPet = () => {
             <label className="block mb-2 font-semibold text-gray-700">
               Pet Name
             </label>
+
             <input
               type="text"
               name="petName"
@@ -85,15 +118,20 @@ const AddPet = () => {
             <label className="block mb-2 font-semibold text-gray-700">
               Species
             </label>
+
             <select
               name="species"
               className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-orange-500"
               required
             >
               <option value="">Select Species</option>
+
               <option value="Dog">Dog</option>
+
               <option value="Cat">Cat</option>
+
               <option value="Bird">Bird</option>
+
               <option value="Rabbit">Rabbit</option>
             </select>
           </div>
@@ -102,6 +140,7 @@ const AddPet = () => {
             <label className="block mb-2 font-semibold text-gray-700">
               Breed
             </label>
+
             <input
               type="text"
               name="breed"
@@ -115,6 +154,7 @@ const AddPet = () => {
             <label className="block mb-2 font-semibold text-gray-700">
               Age
             </label>
+
             <input
               type="text"
               name="age"
@@ -128,13 +168,16 @@ const AddPet = () => {
             <label className="block mb-2 font-semibold text-gray-700">
               Gender
             </label>
+
             <select
               name="gender"
               className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-orange-500"
               required
             >
               <option value="">Select Gender</option>
+
               <option value="Male">Male</option>
+
               <option value="Female">Female</option>
             </select>
           </div>
@@ -143,6 +186,7 @@ const AddPet = () => {
             <label className="block mb-2 font-semibold text-gray-700">
               Image URL
             </label>
+
             <input
               type="text"
               name="image"
@@ -156,6 +200,7 @@ const AddPet = () => {
             <label className="block mb-2 font-semibold text-gray-700">
               Health Status
             </label>
+
             <input
               type="text"
               name="health"
@@ -169,13 +214,16 @@ const AddPet = () => {
             <label className="block mb-2 font-semibold text-gray-700">
               Vaccination Status
             </label>
+
             <select
               name="vaccination"
               className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-orange-500"
               required
             >
               <option value="">Select Status</option>
+
               <option value="Vaccinated">Vaccinated</option>
+
               <option value="Not Vaccinated">Not Vaccinated</option>
             </select>
           </div>
@@ -184,6 +232,7 @@ const AddPet = () => {
             <label className="block mb-2 font-semibold text-gray-700">
               Location
             </label>
+
             <input
               type="text"
               name="location"
@@ -197,6 +246,7 @@ const AddPet = () => {
             <label className="block mb-2 font-semibold text-gray-700">
               Adoption Fee
             </label>
+
             <input
               type="number"
               name="fee"
@@ -210,6 +260,7 @@ const AddPet = () => {
             <label className="block mb-2 font-semibold text-gray-700">
               Owner Email
             </label>
+
             <input
               type="email"
               value={user?.email || ""}
@@ -222,6 +273,7 @@ const AddPet = () => {
             <label className="block mb-2 font-semibold text-gray-700">
               Description
             </label>
+
             <textarea
               name="description"
               rows="6"

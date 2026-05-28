@@ -18,7 +18,7 @@ const PetDetails = () => {
   const [alreadyRequested, setAlreadyRequested] = useState(false);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/pets/${id}`, {
+    fetch(`https://pet-heaven-server-a9.onrender.com/pets/${id}`, {
       credentials: "include",
     })
       .then((res) => res.json())
@@ -31,7 +31,7 @@ const PetDetails = () => {
   useEffect(() => {
     if (user?.email && pet?._id) {
       fetch(
-        `http://localhost:5000/requests/check?petId=${pet._id}&email=${user.email}`,
+        `https://pet-heaven-server-a9.onrender.com/requests/check?petId=${pet._id}&email=${user.email}`,
       )
         .then((res) => res.json())
         .then((data) => {
@@ -78,7 +78,7 @@ const PetDetails = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:5000/requests", {
+      const response = await fetch("https://pet-heaven-server-a9.onrender.com/requests", {
         method: "POST",
         credentials: "include",
         headers: {
