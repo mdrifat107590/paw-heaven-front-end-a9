@@ -25,10 +25,8 @@ A full-stack, responsive PetHeaven built using the MERN stack. This platform all
 ### Client-Side (Frontend)
 - `react` / `react-dom` - Core UI library
 - `react-router-dom` - Navigation and routing (with private route persistence)
-- `axios` - Promise-based HTTP client for API requests
-- `react-toastify` or `sweetalert2` - UI-based toast notifications
+- `sweetalert2`  - UI-based toast notifications
 - `react-icons` - Icon library for modern UI design
-- `framer-motion` *(Optional chosen requirement)* - Smooth UI animations
 
 ### Server-Side (Backend)
 - `express` - Fast, unopinionated web framework for Node.js
